@@ -17,9 +17,24 @@ func TestResponse_Body(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewBufferString(responseBody)),
 		},
 	}
+
 	body, err := resp.Body()
 	assert.NoError(t, err)
 	assert.Equal(t, body, []byte(responseBody))
+}
+
+func TestResponse_String(t *testing.T) {
+	responseBody := "Hello, world!"
+	resp := &Response{
+		RawResponse: &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewBufferString(responseBody)),
+		},
+	}
+
+	body, err := resp.String()
+	assert.NoError(t, err)
+	assert.Equal(t, body, responseBody)
 }
 
 func TestResponse_Json(t *testing.T) {
@@ -42,6 +57,22 @@ func TestResponse_Json(t *testing.T) {
 	err := resp.Json(&actualData)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedData, actualData)
-	assert.NoError(t, err)
+}
 
+func TestResponse_Map(t *testing.T) {
+	// 创建一个模拟的 JSON 响应
+	testData := map[string]string{"message": "hello world"}
+	jsonBody, _ := json.Marshal(testData)
+
+	resp := &Response{
+		RawResponse: &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewBuffer(jsonBody)),
+		},
+	}
+
+	// 调用 Json 方法
+	actualData, err := resp.Map()
+	assert.NoError(t, err)
+	assert.Equal(t, testData, actualData)
 }
